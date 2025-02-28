@@ -10,6 +10,17 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+
+    public function showLogin(){
+        if(Auth::check())
+        return redirect('/user/profiles');
+        return view('auth.login');
+    }
+    public function showRegister(){
+        if(Auth::check())
+        return redirect('/user/profiles');
+        return view('auth.register');
+    }
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -21,9 +32,9 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             if (Auth::user()->role === 'admin') {
-                return redirect()->intended('/dashboard');
+                return redirect()->intended('/admin/dashboard');
             }
-            return redirect()->intended('/');
+            return redirect()->intended('/user/profiles');
         }
 
         return back()->withErrors([
