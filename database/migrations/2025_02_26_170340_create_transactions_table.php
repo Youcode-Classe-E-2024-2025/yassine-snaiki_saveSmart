@@ -12,10 +12,10 @@ return new class extends Migration
             $table->uuid('id')->primary()->default(DB::raw('uuid_generate_v4()'));
             $table->uuid('profile_id');
             $table->float('amount');
-            $table->uuid('category_id');
+            $table->uuid('category_id')->nullable();
             $table->string('type');
             $table->foreign('profile_id')->references('id')->on('profiles')->cascadeOnDelete();
-            $table->foreign('category_id')->references('id')->on('categories')->cascadeOnDelete();
+            $table->foreign('category_id')->references('id')->on('categories')->nullOnDelete();
             $table->timestamps();
         });
     }

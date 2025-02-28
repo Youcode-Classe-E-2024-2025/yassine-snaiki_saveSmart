@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
     public $timestamps = false;
@@ -49,4 +50,8 @@ class User extends Authenticatable
     public function profiles()      {
         return $this->hasMany(Profile::class);
     }
+    public function categories()      {
+        return $this->hasMany(Category::class);
+    }
+
 }

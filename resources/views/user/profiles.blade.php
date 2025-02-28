@@ -113,6 +113,12 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required maxlength="4" inputmode="numeric">
                 </div>
+                <div>
+                    <label for="income" class="block text-sm font-medium text-gray-700 mb-2">Income</label>
+                    <input type="number" name="income"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required inputmode="numeric">
+                </div>
                 <div class="flex justify-end space-x-4">
                     <button type="button" onclick="hideCreateProfileModal()"
                         class="px-4 py-2 text-gray-600 hover:text-gray-800">

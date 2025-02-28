@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +19,7 @@ class CategoryFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'user_id' => User::where('username','user1')->first()->id ?? User::factory(),
         ];
     }
 }

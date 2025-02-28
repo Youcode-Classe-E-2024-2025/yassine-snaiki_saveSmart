@@ -9,7 +9,6 @@
                 <p class="text-2xl font-bold text-green-600">$5,000</p>
                 <a href="/income/add" class="text-blue-500 hover:underline mt-2 inline-block">Add Income</a>
             </div>
-
             <!-- Expenses Section -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4">Expenses</h2>
@@ -96,6 +95,7 @@
                     <thead>
                         <tr class="border-b">
                             <th class="text-left py-2">Date</th>
+                            <th class="text-left py-2">Profile</th>
                             <th class="text-left py-2">Category</th>
                             <th class="text-right py-2">Amount</th>
                         </tr>
@@ -105,7 +105,8 @@
                         @foreach ($profile->transactions as $transaction)
                             <tr class="border-b">
                                 <td class="py-3">{{ $transaction->created_at }}</td>
-                                <td>{{ $transaction->category->name }}</td>
+                                <td class="py-3">{{ $transaction->profile->username }}</td>
+                                <td>{{ $transaction->category ? $transaction->category->name : 'others' }}</td>
                                 <td
                                     class="text-right font-medium {{ $transaction->type === 'w' ? 'text-red-600' : 'text-green-600' }}">
                                     ${{ $transaction->amount }}</td>
@@ -117,29 +118,49 @@
             </div>
         </div>
 
-        <!-- Categories Section -->
-        <div class="mt-12">
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-4 mt-5">
+            <h3 class="text-lg font-semibold mb-4">Add Category</h3>
+            <form action="/category/add" method="POST" class="flex flex-col sm:flex-row gap-4">
+                @csrf
+                <div class="w-full sm:w-3/4">
+                    <input type="text" name="name" placeholder="name"
+                        class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
+                <div class="w-full sm:w-1/4">
+                    <button type="submit"
+                        class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Add Category
+                    </button>
+                </div>
+            </form>
+        </div>
+
+          <!-- Categories Section -->
+          <div class="mt-12">
             <h2 class="text-2xl font-semibold mb-4">Expense Categories</h2>
             <div class="bg-white p-6 rounded-lg shadow-md">
-                <ul class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <li><a href="/categories/food" class="text-blue-500 hover:underline">Food</a></li>
-                    <li><a href="/categories/housing" class="text-blue-500 hover:underline">Housing</a></li>
-                    <li><a href="/categories/transportation" class="text-blue-500 hover:underline">Transportation</a>
-                    </li>
-                    <li><a href="/categories/entertainment" class="text-blue-500 hover:underline">Entertainment</a></li>
-                    <li><a href="/categories/add" class="text-green-500 hover:underline">+ Add Category</a></li>
+                <ul class="flex flex-col gap-4">
+                    @foreach ($categories as $category)
+                    <li class="flex justify-between">
+                        <p  class="text-blue-500 hover:underline">{{ $category->name }}</p>
+                        <form action="/category/delete" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <input type="hidden" name="id" value="{{ $category->id }}">
+                            <button type="submit">
+                                <svg class="w-4 h-4" fill="red" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </form>
+                        </li>
+                    @endforeach
                 </ul>
             </div>
         </div>
 
-        <!-- Family Account Section -->
-        <div class="mt-12">
-            <h2 class="text-2xl font-semibold mb-4">Family Account</h2>
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <p class="mb-4">Manage your family members and their access to the account.</p>
-                <a href="/family/manage" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Manage
-                    Family Members</a>
-            </div>
-        </div>
+
     </div>
 </x-playout>
