@@ -21,7 +21,8 @@ class User extends Authenticatable
         'username',
         'email',
         'password',
-        'role'
+        'role',
+        'image'
     ];
 
     /**
@@ -41,8 +42,11 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'id' => 'string', 
+            'id' => 'string',
             'password' => 'hashed',
         ];
+    }
+    public function profiles()      {
+        return $this->hasMany(Profile::class);
     }
 }
