@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\UserController;
+use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'home');
@@ -29,5 +31,7 @@ Route::post('/user/profiles/{id}',[ProfileController::class,'profile']);
 Route::get('/user/profiles/{id}',[ProfileController::class,'showProfile']);
 
 Route::post('/transactions/add',[TransactionController::class,'create']);
+Route::post('/category/add',[CategoryController::class,'create']);
+Route::delete('/category/delete',[CategoryController::class,'delete']);
 
 

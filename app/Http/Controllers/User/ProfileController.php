@@ -40,7 +40,7 @@ class ProfileController extends Controller
             return redirect('/user/profiles')->withErrors(['message' => 'Unauthorized access']);
         }
         $profile = Profile::findOrFail($id);
-        
+
         return view('user.profile', ['profile' => $profile,'categories' => Category::all()]);
     }
 
@@ -66,7 +66,8 @@ class ProfileController extends Controller
         $credentials = $request->validate([
             'username' => 'required|string|min:4',
             'password' => 'required|digits:4',
-            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'income' => 'numeric|min:0'
         ]);
         if ($request->hasFile('avatar')) {
             $imagePath = $request->file('avatar')->store('avatars', 'public');

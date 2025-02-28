@@ -18,8 +18,8 @@ class TransactionController extends Controller
         if(session('profile_authenticated') === $validated['profile_id']){
 
             Transaction::create($validated);
-            dd('yes');
         }
+        return back();
 
     }
 }
