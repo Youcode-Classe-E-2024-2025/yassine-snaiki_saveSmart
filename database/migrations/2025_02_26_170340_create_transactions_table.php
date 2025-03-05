@@ -13,7 +13,7 @@ return new class extends Migration
             $table->uuid('profile_id');
             $table->float('amount');
             $table->uuid('category_id')->nullable();
-            $table->string('type');
+            $table->string('type')->default('w');
             $table->foreign('profile_id')->references('id')->on('profiles')->cascadeOnDelete();
             $table->foreign('category_id')->references('id')->on('categories')->nullOnDelete();
             $table->timestamps();
