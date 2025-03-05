@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\GoalController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\UserController;
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'home');
@@ -34,4 +36,16 @@ Route::post('/transactions/add',[TransactionController::class,'create']);
 Route::post('/category/add',[CategoryController::class,'create']);
 Route::delete('/category/delete',[CategoryController::class,'delete']);
 
+// Route::get('/user/{id}/goals',[GoalController::class,'index']);
+
+
+Route::get('/debug', function () {
+    $schedule = new Schedule();
+    $schedule->command('inspire')->everySecond();
+
+    dd($schedule);
+});
+
+
+Route::resource('goals',GoalController::class);
 
