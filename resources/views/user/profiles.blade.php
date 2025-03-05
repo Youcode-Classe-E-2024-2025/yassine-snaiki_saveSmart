@@ -65,12 +65,16 @@
                 <span class="mt-2 text-lg text-gray-900">Add Profile</span>
             </button>
         </div>
-
-        <!-- Manage Profiles Button -->
-        <button id="manageProfilesBtn" onclick="toggleManageMode()"
+        <div class="flex gap-2">
+            <button id="manageProfilesBtn" onclick="toggleManageMode()"
             class="px-6 py-2 border-2 border-gray-800 text-gray-800 rounded-md hover:bg-gray-800 hover:text-white transition-colors duration-200">
             Manage Profiles
         </button>
+        <a href="{{route('goals.index')}}"
+            class="px-6 py-2 border-2 border-gray-800 text-gray-800 rounded-md hover:bg-gray-800 hover:text-white transition-colors duration-200">
+            Saving Goals
+        </a>
+        </div>
     </div>
 
     <!-- Create Profile Modal -->

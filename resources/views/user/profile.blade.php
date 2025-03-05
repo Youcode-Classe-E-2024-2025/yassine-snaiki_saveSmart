@@ -1,29 +1,28 @@
+
+
 <x-playout :profile="$profile">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-8">Welcome to SaveSmart, {{ Auth::user()->name }}</h1>
+        <h1 class="text-3xl font-bold mb-8">This month stats, {{ Auth::user()->name }}</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Income Section -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4">Income</h2>
-                <p class="text-2xl font-bold text-green-600">$5,000</p>
-                <a href="/income/add" class="text-blue-500 hover:underline mt-2 inline-block">Add Income</a>
+                <p class="text-2xl font-bold text-green-600">${{$totalIncome}}</p>
             </div>
             <!-- Expenses Section -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4">Expenses</h2>
-                <p class="text-2xl font-bold text-red-600">$3,500</p>
-                <a href="/expenses/add" class="text-blue-500 hover:underline mt-2 inline-block">Add Expense</a>
+                <p class="text-2xl font-bold text-red-600">${{$totalExpense}}</p>
             </div>
 
             <!-- Financial Goals Section -->
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h2 class="text-xl font-semibold mb-4">Financial Goals</h2>
-                <p class="text-lg">Savings Goal: $10,000</p>
+                <p class="text-lg">Savings Goal: ${{ $goal->amount }}</p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: 45%"></div>
+                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $goal->progress/$goal->amount * 100 }}"></div>
                 </div>
-                <a href="/goals/add" class="text-blue-500 hover:underline mt-2 inline-block">Set New Goal</a>
             </div>
         </div>
 
@@ -50,14 +49,14 @@
 
         <!-- Transactions Section -->
         <div class="mt-12">
-            <h2 class="text-2xl font-semibold mb-4">Transactions</h2>
+            <h2 class="text-2xl font-semibold mb-4">Expenses</h2>
 
             <!-- Add Transaction Form -->
             <div class="bg-white p-6 rounded-lg shadow-md mb-4">
-                <h3 class="text-lg font-semibold mb-4">Add Transaction</h3>
+                <h3 class="text-lg font-semibold mb-4">Add an Expense</h3>
                 <form action="/transactions/add" method="POST" class="flex flex-col sm:flex-row gap-4">
                     @csrf
-                    <div class="w-full sm:w-1/4">
+                    <div class="w-full sm:w-1/3">
                         <select name="category_id"
                             class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="" class="hidden" disabled selected>Select Category</option>
@@ -66,24 +65,16 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="w-full sm:w-1/4">
-                        <select name="type"
-                            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="" class="hidden" disabled selected>Select Type</option>
-                            <option value="d">Deposit</option>
-                            <option value="w">Withdrawal</option>
 
-                        </select>
-                    </div>
-                    <div class="w-full sm:w-1/4">
+                    <div class="w-full sm:w-1/3">
                         <input type="number" name="amount" placeholder="Amount"
                             class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <input type="hidden" name="profile_id" value="{{ $profile->id }}">
-                    <div class="w-full sm:w-1/4">
+                    <div class="w-full sm:w-1/3">
                         <button type="submit"
                             class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            Add Transaction
+                            Add Expense
                         </button>
                     </div>
                 </form>
@@ -102,7 +93,7 @@
                     </thead>
                     <tbody>
                         @foreach (Auth::user()->profiles as $profile)
-                        @foreach ($profile->transactions as $transaction)
+                        @foreach ($profile->transactions->where('created_at','>=', \Carbon\Carbon::now()->subMinute()) as $transaction)
                             <tr class="border-b">
                                 <td class="py-3">{{ $transaction->created_at }}</td>
                                 <td class="py-3">{{ $transaction->profile->username }}</td>
