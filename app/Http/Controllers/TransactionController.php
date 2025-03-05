@@ -10,7 +10,6 @@ class TransactionController extends Controller
     public function create(Request $request){
         $validated = $request->validate([
             'amount'=>"required|numeric",
-            'type'=>"required|in:w,d",
             "category_id"=>"required|string",
             "profile_id" => "required|string"
         ]);

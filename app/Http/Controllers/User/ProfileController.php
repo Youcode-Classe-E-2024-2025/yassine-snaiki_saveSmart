@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Profile;
 use Auth;
+use Carbon\Carbon;
 use Hash;
 use Illuminate\Http\Request;
 
@@ -40,8 +41,16 @@ class ProfileController extends Controller
             return redirect('/user/profiles')->withErrors(['message' => 'Unauthorized access']);
         }
         $profile = Profile::findOrFail($id);
-
-        return view('user.profile', ['profile' => $profile,'categories' => Category::all()]);
+        $totalIncome = Auth::user()->profiles()->sum('income');
+        $totalExpense = 0;
+        foreach (Auth::user()->profiles as $profile) {
+            $expenses = $profile->transactions()
+                ->where('created_at', '>=', Carbon::now()->subMinute())
+                ->sum('amount');
+            $totalExpense += $expenses;
+        }
+        $goal = Auth::user()->goals()->where('checked',false)->first();
+        return view('user.profile', ['profile' => $profile,'categories' => Category::all(),'totalIncome' => $totalIncome,'totalExpense'=>$totalExpense,'goal'=>$goal]);
     }
 
     public function closeProfile()
