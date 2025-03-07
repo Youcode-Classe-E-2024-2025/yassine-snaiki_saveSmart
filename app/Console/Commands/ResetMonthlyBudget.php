@@ -14,17 +14,20 @@ class ResetMonthlyBudget extends Command
 
     public function handle()
     {
+        $lastPeriodStart = Carbon::now()->subMinute()->startOfMinute();
+        $lastPeriodEnd = Carbon::now()->subMinute()->endOfMinute();
         $currentPeriod = Carbon::now()->format('Y-m-d H:i');
         $users = User::with('profiles.transactions')->get();
 
         foreach ($users as $user) {
-            $totalExpenses = 0;
             $monthlyBudget = $user->profiles()->sum('income');
+            $totalExpenses = 0;
 
             foreach ($user->profiles as $profile) {
                 $expenses = $profile->transactions()
-                    ->where('created_at', '>=', Carbon::now()->subMinute())
+                    ->whereBetween('created_at', [$lastPeriodStart, $lastPeriodEnd])
                     ->sum('amount');
+
                 $totalExpenses += $expenses;
             }
 
@@ -46,8 +49,8 @@ class ResetMonthlyBudget extends Command
             }
 
             MonthlySummary::create([
-                'user_id'      => $user->id,
-                'period'       => $currentPeriod,
+                'user_id' => $user->id,
+                'period' => $currentPeriod,
                 'saved_amount' => $savedAmount,
             ]);
         }

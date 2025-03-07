@@ -51,7 +51,11 @@ class GoalController extends Controller
      */
     public function update(Request $request, Goal $goal)
     {
-        //
+        $request->validate([
+            'amount'=>'numeric|min:100'
+        ]);
+        $goal->update(['amount'=>$request->amount]);
+        return back();
     }
 
     /**
