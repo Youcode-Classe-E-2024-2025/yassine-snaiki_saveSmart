@@ -13,16 +13,17 @@ use Illuminate\Http\Request;
 class ProfileController extends Controller
 {
 
-    public function profile(Request $request,$id){
-        if(!Auth::check())
-        return redirect('/login');
+    public function profile(Request $request, $id)
+    {
+        if (!Auth::check())
+            return redirect('/login');
 
         $credentials = $request->validate([
             'password' => 'required|digits:4',
         ]);
         $profile = Profile::findOrFail($id);
 
-        if(Hash::check($credentials['password'],$profile->password)) {
+        if (Hash::check($credentials['password'], $profile->password)) {
             session(["profile_authenticated" => $id]);
             return redirect("user/profiles/$id");
         }
@@ -34,6 +35,7 @@ class ProfileController extends Controller
 
     public function showProfile($id)
     {
+
         if (!Auth::check()) {
             return redirect('/login');
         }
@@ -41,16 +43,29 @@ class ProfileController extends Controller
             return redirect('/user/profiles')->withErrors(['message' => 'Unauthorized access']);
         }
         $profile = Profile::findOrFail($id);
+
         $totalIncome = Auth::user()->profiles()->sum('income');
         $totalExpense = 0;
-        foreach (Auth::user()->profiles as $profile) {
-            $expenses = $profile->transactions()
-                ->where('created_at', '>=', Carbon::now()->subMinute())
+        $periodStart = Carbon::now()->startOfMinute();
+        $periodEnd = Carbon::now()->endOfMinute();
+        foreach (Auth::user()->profiles as $pr) {
+            $expenses = $pr->transactions()
+                ->whereBetween('created_at', [$periodStart, $periodEnd])
                 ->sum('amount');
             $totalExpense += $expenses;
         }
-        $goal = Auth::user()->goals()->where('checked',false)->first();
-        return view('user.profile', ['profile' => $profile,'categories' => Category::all(),'totalIncome' => $totalIncome,'totalExpense'=>$totalExpense,'goal'=>$goal]);
+        $transactions = collect(); // Initialize a collection
+
+        foreach (Auth::user()->profiles as $profile) {
+            // Get the transactions for this profile for the current minute
+            $profileTransactions = $profile->transactions()->whereBetween('created_at', [$periodStart, $periodEnd])->get();
+
+            // Merge the transactions into the main collection
+            $transactions = $transactions->merge($profileTransactions);
+        }
+        $goal = Auth::user()->goals()->where('checked', false)->first();
+
+        return view('user.profile', ['profile' => $profile, 'categories' => Auth::user()->categories()->get()->all(), 'totalIncome' => $totalIncome, 'totalExpense' => $totalExpense, 'goal' => $goal, 'periodStart' => $periodStart, 'periodEnd' => $periodEnd, 'transactions' => $transactions]);
     }
 
     public function closeProfile()
@@ -64,18 +79,20 @@ class ProfileController extends Controller
 
 
 
-    public function profiles(Request $request){
-        if(Auth::check())
-        return view('user.profiles');
+    public function profiles(Request $request)
+    {
+        if (Auth::check())
+            return view('user.profiles');
         return redirect('/login');
     }
-    public function createProfile(Request $request){
-        if(!Auth::check())
-        return redirect('/login');
+    public function createProfile(Request $request)
+    {
+        if (!Auth::check())
+            return redirect('/login');
         $credentials = $request->validate([
             'username' => 'required|string|min:4',
             'password' => 'required|digits:4',
-            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'income' => 'numeric|min:0'
         ]);
         if ($request->hasFile('avatar')) {
@@ -93,14 +110,14 @@ class ProfileController extends Controller
         if (!Auth::check()) {
             return redirect('/login');
         }
-            $profile = Profile::findOrFail($id);
+        $profile = Profile::findOrFail($id);
 
-            if ($profile->user_id == Auth::id()) {
-                $profile->delete();
-                return redirect()->back()->with('success', 'Profile deleted successfully!');
-            } else {
-                return redirect()->back()->with('error', 'You are not authorized to delete this profile.');
-            }
+        if ($profile->user_id == Auth::id()) {
+            $profile->delete();
+            return redirect()->back()->with('success', 'Profile deleted successfully!');
+        } else {
+            return redirect()->back()->with('error', 'You are not authorized to delete this profile.');
+        }
     }
 
 }

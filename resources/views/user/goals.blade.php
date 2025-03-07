@@ -30,7 +30,7 @@
                     <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
                         <div class="flex justify-between mb-2">
                             <span class="text-sm font-medium text-gray-700">Target: ${{ number_format($currentGoal->amount, 2) }}</span>
-                            <span class="text-sm font-medium text-gray-700">Saved: ${{ number_format($currentGoal->saved_amount, 2) }}</span>
+                            <span class="text-sm font-medium text-gray-700">Saved: ${{ number_format($currentGoal->progress, 2) }}</span>
                         </div>
 
                         <!-- Progress Bar -->
@@ -39,8 +39,8 @@
                         </div>
 
                         <div class="flex justify-between text-xs text-gray-500">
-                            <span>{{ number_format(($currentGoal->saved_amount / $currentGoal->amount) * 100, 0) }}% Complete</span>
-                            <span>${{ number_format($currentGoal->amount - $currentGoal->saved_amount, 2) }} Remaining</span>
+                            <span>{{ min(($currentGoal->progress / $currentGoal->amount) * 100, 100)}}% Complete</span>
+                            <span>${{ number_format($currentGoal->amount - $currentGoal->progress, 2) }} Remaining</span>
                         </div>
                     </div>
                 @else
@@ -100,7 +100,7 @@
                                         <div>
                                             <p class="text-sm font-medium text-indigo-600 truncate">{{ $goal->title }}</p>
                                             <p class="text-sm text-gray-500">
-                                                Target: ${{ number_format($goal->amount, 2) }} · 
+                                                Target: ${{ number_format($goal->amount, 2) }} ·
                                             </p>
                                         </div>
                                         <div class="ml-2 flex-shrink-0 flex">
@@ -139,12 +139,6 @@
                                     <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
                                         Edit Saving Goal
                                     </h3>
-
-                                    <div class="mt-4">
-                                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                                        <input type="text" name="title" id="title" value="{{ $currentGoal->title }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                                    </div>
-
                                     <div class="mt-4">
                                         <label for="amount" class="block text-sm font-medium text-gray-700">Target Amount ($)</label>
                                         <input type="number" step="0.01" min="0" name="amount" id="amount" value="{{ $currentGoal->amount }}" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">

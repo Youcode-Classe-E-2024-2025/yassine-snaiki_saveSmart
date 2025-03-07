@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\UserController;
@@ -49,3 +51,7 @@ Route::get('/debug', function () {
 
 Route::resource('goals',GoalController::class);
 
+
+Route::get('/report/monthly', [ReportController::class, 'generateMonthlyReport'])->name('report.monthly');
+
+Route::get('/summary',[SummaryController::class,'index'])->name('stats');

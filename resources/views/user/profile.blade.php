@@ -1,5 +1,4 @@
 
-
 <x-playout :profile="$profile">
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold mb-8">This month stats, {{ Auth::user()->name }}</h1>
@@ -18,32 +17,17 @@
 
             <!-- Financial Goals Section -->
             <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold mb-4">Financial Goals</h2>
+                <h2 class="text-xl font-semibold mb-4">Financial Goal</h2>
+                @if($goal)
                 <p class="text-lg">Savings Goal: ${{ $goal->amount }}</p>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $goal->progress/$goal->amount * 100 }}"></div>
+                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ min(($goal->progress / $goal->amount) * 100, 100) }}%"></div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Budget Distribution -->
-        <div class="mt-12">
-            <h2 class="text-2xl font-semibold mb-4">Budget Distribution</h2>
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <div class="flex justify-between items-center">
-                    <div class="w-1/3 text-center">
-                        <div class="text-lg font-semibold">Needs</div>
-                        <div class="text-3xl font-bold text-blue-600">50%</div>
-                    </div>
-                    <div class="w-1/3 text-center">
-                        <div class="text-lg font-semibold">Wants</div>
-                        <div class="text-3xl font-bold text-green-600">30%</div>
-                    </div>
-                    <div class="w-1/3 text-center">
-                        <div class="text-lg font-semibold">Savings</div>
-                        <div class="text-3xl font-bold text-purple-600">20%</div>
-                    </div>
+                @else
+                <div class="w-full bg-gray-200 px-4">
+                    <p>No goals determined</p>
                 </div>
+                @endif
             </div>
         </div>
 
@@ -57,6 +41,7 @@
                 <form action="/transactions/add" method="POST" class="flex flex-col sm:flex-row gap-4">
                     @csrf
                     <div class="w-full sm:w-1/3">
+                        <input type="hidden" name="confirmed" value="0">
                         <select name="category_id"
                             class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="" class="hidden" disabled selected>Select Category</option>
@@ -70,7 +55,7 @@
                         <input type="number" name="amount" placeholder="Amount"
                             class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <input type="hidden" name="profile_id" value="{{ $profile->id }}">
+                
                     <div class="w-full sm:w-1/3">
                         <button type="submit"
                             class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -92,8 +77,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (Auth::user()->profiles as $profile)
-                        @foreach ($profile->transactions->where('created_at','>=', \Carbon\Carbon::now()->subMinute()) as $transaction)
+                        @foreach ($transactions as $transaction)
                             <tr class="border-b">
                                 <td class="py-3">{{ $transaction->created_at }}</td>
                                 <td class="py-3">{{ $transaction->profile->username }}</td>
@@ -102,7 +86,6 @@
                                     class="text-right font-medium {{ $transaction->type === 'w' ? 'text-red-600' : 'text-green-600' }}">
                                     ${{ $transaction->amount }}</td>
                             </tr>
-                        @endforeach
                         @endforeach
                     </tbody>
                 </table>
@@ -140,6 +123,7 @@
                             @csrf
                             @method('DELETE')
                             <input type="hidden" name="id" value="{{ $category->id }}">
+
                             <button type="submit">
                                 <svg class="w-4 h-4" fill="red" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -151,7 +135,36 @@
                 </ul>
             </div>
         </div>
-
-
     </div>
+
+    <!-- Modal for exceeding 20% saving percentage -->
+    @if(session('isExceeded'))
+    <div id="savingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-xl font-bold mb-4 text-red-600">Warning!</h2>
+            <p class="mb-6 text-gray-800">{{ session('isExceeded') }}</p>
+
+            <form action="/transactions/add" method="POST">
+                @csrf
+                <div class="hidden">
+                    <input type="hidden" name="category_id" value="{{ session('validated')['category_id'] }}">
+                    <input type="hidden" name="amount" value="{{  session('validated')['amount']}}">
+                    <input type="hidden" name="confirmed" value="1">
+                </div>
+
+                <div class="flex justify-between">
+                    <button type="button" onclick="document.getElementById('savingModal').style.display = 'none';"
+                        class="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Confirm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
 </x-playout>
+
